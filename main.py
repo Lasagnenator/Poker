@@ -87,9 +87,8 @@ class InGameFrame(Frames.JoinGameFrame):
             pass #as in already connected
         
         #rarely, but can cause issues due to coordination of threads
-        #thus, we need this
-        time.sleep(1)
-        socketstuff.client.send_match()
+        #time.sleep(1)
+        wx.CallLater(1000, socketstuff.client.send_match)
         wx.CallLater(500, self.Update)
 
     def OnClose(self, event):
@@ -110,8 +109,10 @@ class InGameFrame(Frames.JoinGameFrame):
         socketstuff.client.send_fold()
     def Match(self,event):
         socketstuff.client.send_match()
+        self.OnText(None)
     def Raise(self,event):
         socketstuff.client.send_raise(self.RaiseTextBox.Value)
+        self.OnText(None)
     def OnText(self,event):
         #check if the number put in is valid
         self.RaiseButton.Enabled = True

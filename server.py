@@ -39,8 +39,10 @@ def begin_listen():
 
 def end_listen():
     global alive
-    alive = False
     send_init()
+    time.sleep(0.1)
+    alive = False
+    
     print("connected")
     deal_cards()
 
@@ -63,7 +65,7 @@ def send_init():
     send_to_all(payload)
 
 def handle_recv(c_s):
-    global raise_by
+    global raise_by, info
     number = connected.index(c_s)
     while True:
         recv = c_s.recv(4096)
