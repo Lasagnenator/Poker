@@ -46,8 +46,8 @@ def _handle_recv():
                 if not "\x00" in info:
                     break
                 player_info.append([*info.split("\x00"), "-"])
-                if info.split("\x00")[0]==config.username:
-                    number = data.index(info)
+                #if info.split("\x00")[0]==config.username:
+                    #number = data.index(info)
         if head=="INITCARD":
             #print("Card initilisation")
             number = int(data[0])

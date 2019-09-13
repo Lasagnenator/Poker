@@ -100,8 +100,8 @@ def handle_recv(c_s):
                 pass
 
             #need this otherwise client doesn't have enough time to react
-            time.sleep(0.1)
-            send_turn()
+            #time.sleep(0.1)
+            #send_turn()
         
 def send_chat(name, message):
     head = "CHAT\n"
