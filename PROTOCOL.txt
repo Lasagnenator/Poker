@@ -1,0 +1,54 @@
+standard TCP connection between server and client
+
+-------------------------------------------------
+CLIENT -> SERVER
+
+--INIT PROTOCOL    -- must be sent along with connection
+INIT\n
+<name of player>\n
+<password>
+
+--CHAT PROTOCOL    -- sent with a chat message
+CHAT\n
+<username>\n
+<message>
+
+--GAMEPLAY PROTOCOL-- sent as a response to gameplay event
+GAME\n
+FOLD | RAISE\n<n> | MATCH
+
+
+-------------------------------------------------
+SERVER -> CLIENT
+
+--INIT PROTOCOL    -- sent to every player
+INIT\n
+<player1name>\x00<money>\n
+<player2name>\x00<money>\n
+...
+
+--INITCARD PROTOCOL-- sent individually
+INITCARD\n
+<number>\n
+<card 1>\n
+<card 2>
+
+--CHAT PROTOCOL    -- sent to every player
+CHAT\n
+<message>
+
+--GAMEPLAY PROTOCOL-- sent to every player
+GAME\n
+<player number>\n
+RAISE\n<n> | FOLD | MATCH
+
+--TURN PROTOCOL    -- sent individually
+TURN\n
+<number>
+
+--TABLE PROTOCOL   -- sent to every player
+TABLE\n
+FIRST3\n | FOURTH\n | FIFTH\n
+<card1>\n
+<card2>\n      -- only for FIRST3
+<card3>        -- only for FIRST3
