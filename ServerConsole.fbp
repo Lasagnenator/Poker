@@ -2405,7 +2405,7 @@
             <property name="name">TableCardsFrame</property>
             <property name="pos"></property>
             <property name="size">710,240</property>
-            <property name="style">wxDEFAULT_FRAME_STYLE</property>
+            <property name="style">wxCAPTION|wxCLOSE_BOX|wxMINIMIZE_BOX|wxSYSTEM_MENU</property>
             <property name="subclass">; ; forward_declare</property>
             <property name="title">Cards on table</property>
             <property name="tooltip"></property>

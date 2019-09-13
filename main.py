@@ -2,6 +2,7 @@ import wx
 import Frames
 import socketstuff
 import time
+import sys
 
 server_ip = ""
 running = False #game running
@@ -46,8 +47,8 @@ class CreateGameFrame(Frames.CreateGameFrame):
         waiting = False
     def Cancel(self, event):
         self.Show(False)
-        Opening.Show(True)
         socketstuff.server.end_listen()
+        sys.exit()
 
     def UpdateScreen(self):
         socketstuff.server.connected
@@ -84,8 +85,12 @@ class InGameFrame(Frames.JoinGameFrame):
             socketstuff.client.connect(server_ip)
         except:
             pass #as in already connected
-        wx.CallLater(500, self.Update)
+        
+        #rarely, but can cause issues due to coordination of threads
+        #thus, we need this
+        time.sleep(1)
         socketstuff.client.send_match()
+        wx.CallLater(500, self.Update)
 
     def OnClose(self, event):
         global running, waiting, chat_open
@@ -94,6 +99,7 @@ class InGameFrame(Frames.JoinGameFrame):
         running = False
         waiting = False
         chat_open = False
+        sys.exit()
         
     def Fold(self,event):
         self.FoldButton.Enabled=False
@@ -126,12 +132,16 @@ class InGameFrame(Frames.JoinGameFrame):
             return
 
     def Update(self):
+        global running
         #updates the table
         if running:
             wx.CallLater(500, self.Update)
+        else:
+            return
         self.InfoListCtrl.DeleteAllItems()
         for player in socketstuff.client.player_info:
             self.InfoListCtrl.Append(player)
+            
         self.FundsLabel.Label = str(socketstuff.client.player_info[socketstuff.client.number][1])
         self.CurrentRaiseTextBox.Value = str(socketstuff.client.raise_by)
         self.CurrentPotTextBox.Value = str(socketstuff.client.pot)
@@ -174,8 +184,11 @@ class ChatFrame(Frames.ChatFrame):
         
 
     def Update(self):
+        global chat_open
         if chat_open:
             wx.CallLater(500, self.Update)
+        else:
+            return
         self.ChatLogTextBox.Value = socketstuff.client.chat_log
 
 class TableCardsFrame(Frames.TableCardsFrame):

@@ -69,6 +69,7 @@ def handle_recv(c_s):
         recv = c_s.recv(4096)
         recv = recv.decode()
         head, data = recv.split("\n")[0], recv.split("\n")[1:]
+        
         print("Server received text")
         print("\t", head, data)
         
@@ -76,7 +77,7 @@ def handle_recv(c_s):
             username = data[0]
             password = data[1]
             value = money.retrieve(username, password)
-            info.append([username, value])
+            info.append([username, str(value)])
             #print(info)
             
         elif head=="CHAT":
@@ -98,7 +99,9 @@ def handle_recv(c_s):
                 money.set_val(username, password, value)
                 pass
 
-        send_turn()
+            #need this otherwise client doesn't have enough time to react
+            time.sleep(0.1)
+            send_turn()
         
 def send_chat(name, message):
     head = "CHAT\n"
@@ -145,3 +148,6 @@ def send_turn():
     head = "TURN\n"
     payload = head+str(turn)
     send_to_all(payload.encode())
+    turn += 1
+    if turn>=len(connected):
+        turn = 0
