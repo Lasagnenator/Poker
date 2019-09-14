@@ -15,7 +15,7 @@ CHAT\n
 
 --GAMEPLAY PROTOCOL-- sent as a response to gameplay event
 GAME\n
-FOLD | RAISE\n<n> | MATCH
+FOLD | RAISE\n<n> | MATCH | ALLIN
 
 
 -------------------------------------------------
@@ -40,7 +40,7 @@ CHAT\n
 --GAMEPLAY PROTOCOL-- sent to every player
 GAME\n
 <player number>\n
-RAISE\n<n> | FOLD | MATCH
+RAISE\n<n> | FOLD | MATCH | ALLIN
 
 --TURN PROTOCOL    -- sent individually
 TURN\n

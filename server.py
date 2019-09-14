@@ -6,14 +6,15 @@ import time
 import money
 
 Server = socket.socket()
-Server.bind((config.addr, config.port))
 alive = True
+server_running = False
 connected = []
 info = []
 hands = []
 table = []
 turn = 0
 raise_by = 1
+pot = 0
 
 money.load_table()
 
@@ -33,6 +34,8 @@ def update_connections():
 def begin_listen():
     global alive, Server
     alive = True
+    Server.bind((config.addr, config.port))
+    #Server.bind(socket.INADDR_ANY)
     Server.listen()
     t = threading.Thread(target=update_connections)
     t.start()
@@ -65,9 +68,9 @@ def send_init():
     send_to_all(payload)
 
 def handle_recv(c_s):
-    global raise_by, info
+    global raise_by, info, pot
     number = connected.index(c_s)
-    while True:
+    while server_running:
         recv = c_s.recv(4096)
         recv = recv.decode()
         head, data = recv.split("\n")[0], recv.split("\n")[1:]
@@ -79,7 +82,7 @@ def handle_recv(c_s):
             username = data[0]
             password = data[1]
             value = money.retrieve(username, password)
-            info.append([username, str(value)])
+            info.append([username, str(value), ""])
             #print(info)
             
         elif head=="CHAT":
@@ -90,25 +93,33 @@ def handle_recv(c_s):
         elif head=="GAME":
             if data[0]=="FOLD":
                 send_game(number, "FOLD")
+                info[number][2] = "FOLD"
             elif data[0]=="RAISE":
                 send_game(number, "RAISE", data[1])
                 value -= int(data[1])
                 raise_by = int(data[1])
                 money.set_val(username, password, value)
+                pot += raise_by
             elif data[0]=="MATCH":
                 send_game(number, "MATCH")
                 value -= raise_by
                 money.set_val(username, password, value)
-                pass
+                pot += raise_by
+            elif data[0]=="ALLIN":
+                send_game(number, "ALLIN")
+                raise_by = value
+                pot += raise_by
+                value = 0
 
             #need this otherwise client doesn't have enough time to react
-            #time.sleep(0.1)
-            #send_turn()
+            time.sleep(0.1)
+            send_turn()
         
 def send_chat(name, message):
     head = "CHAT\n"
     payload = head + name + ": " + message
     send_to_all(payload.encode())
+    #print(len(connected))
 
 def deal_cards():
     global connected
@@ -142,6 +153,8 @@ def send_game(number, action, val=None):
         payload = head + str(number)+"\n" + "MATCH"
     elif action=="RAISE":
         payload = head + str(number)+"\n" + "RAISE\n" + val
+    elif action=="ALLIN":
+        payload = head + str(number)+"\n" + "ALLIN"
 
     send_to_all(payload.encode())
 
@@ -153,3 +166,23 @@ def send_turn():
     turn += 1
     if turn>=len(connected):
         turn = 0
+        check_end_of_round()
+
+def check_end_of_round():
+    time.sleep(0.1)
+    send_table("FIRST3")
+    time.sleep(0.1)
+    send_table("FOURTH")
+    time.sleep(0.1)
+    send_table("FIFTH")
+
+def send_table(which):
+    global table
+    head = "TABLE\n"
+    if which=="FIRST3":
+        payload = head + "FIRST3\n" + table[0]+"\n" + table[1]+"\n" + table[2]
+    elif which=="FOURTH":
+        payload = head + "FOURTH\n" + table[3]
+    elif which=="FIFTH":
+        payload = head + "FIFTH\n" + table[4]
+    send_to_all(payload.encode())

@@ -13,7 +13,7 @@ def get_ip():
         s.connect(('10.255.255.255', 1))
         IP = s.getsockname()[0]
     except:
-        IP = 'Unknown'
+        IP = 'localhost'
     finally:
         s.close()
     return IP

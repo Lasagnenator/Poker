@@ -3,17 +3,22 @@ import socket
 import threading
 
 client_socket = socket.socket()
+connected = False
 
 chat_log = ""
 player_info = []
 cards = []
 number = 0
+player_number = 0
 raise_by = 1
 pot = 0
 turn = 0
 table = []
 
+started = False
+
 def connect(addr):
+    global connected
     client_socket.connect((addr, config.port))
     #send init protocol
     head = "INIT\n"
@@ -22,6 +27,7 @@ def connect(addr):
 
     #start the thread to receive stuff
     handle_recv()
+    connected = True
 
 def chat(message):
     #must be connected already!
@@ -30,7 +36,7 @@ def chat(message):
     client_socket.sendall(payload.encode())
 
 def _handle_recv():
-    global chat_log, number, raise_by, pot, turn
+    global chat_log, number, raise_by, pot, turn, player_number, started
     while True:
         recv = client_socket.recv(4096)
         recv = recv.decode()
@@ -48,9 +54,10 @@ def _handle_recv():
                 player_info.append([*info.split("\x00"), "-"])
                 #if info.split("\x00")[0]==config.username:
                     #number = data.index(info)
+            started = True
         if head=="INITCARD":
             #print("Card initilisation")
-            number = int(data[0])
+            player_number = int(data[0])
             card1 = data[1]
             card2 = data[2]
             
@@ -81,6 +88,11 @@ def _handle_recv():
                 player_info[number][2] = "Matched"
                 player_info[number][1] = str(int(player_info[number][1])-raise_by)
                 pot += raise_by
+            elif data[1]=="ALLIN":
+                player_info[number][2] = "All in"
+                player_info[number][1] = "0"
+                pot += int(player_info[number][1])
+                print(pot)
 
         if head=="TURN":
             #whose turn it is
@@ -113,4 +125,9 @@ def send_match():
 def send_raise(amount):
     head = "GAME\n"
     payload = head+"RAISE\n"+str(amount)
+    client_socket.sendall(payload.encode())
+
+def send_all_in():
+    head = "GAME\n"
+    payload = head+"ALLIN"
     client_socket.sendall(payload.encode())

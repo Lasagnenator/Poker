@@ -9,6 +9,7 @@
 
 import wx
 import wx.xrc
+import wx.adv
 
 ###########################################################################
 ## Class OpeningFrame
@@ -69,7 +70,7 @@ class OpeningFrame ( wx.Frame ):
 class CreateGameFrame ( wx.Frame ):
 
 	def __init__( self, parent ):
-		wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = u"Create Game", pos = wx.DefaultPosition, size = wx.Size( -1,-1 ), style = wx.CAPTION|wx.CLOSE_BOX|wx.MINIMIZE_BOX|wx.SYSTEM_MENU|wx.TAB_TRAVERSAL )
+		wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = u"Create Game", pos = wx.DefaultPosition, size = wx.Size( -1,-1 ), style = wx.CAPTION|wx.MINIMIZE_BOX|wx.SYSTEM_MENU|wx.TAB_TRAVERSAL )
 
 		self.SetSizeHints( wx.DefaultSize, wx.DefaultSize )
 
@@ -82,7 +83,7 @@ class CreateGameFrame ( wx.Frame ):
 
 		bSizer8.Add( self.m_staticText7, 0, wx.ALL, 5 )
 
-		PlayerListBoxChoices = [ u"Player 1", u"Player 2", u"Player 3" ]
+		PlayerListBoxChoices = []
 		self.PlayerListBox = wx.ListBox( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, PlayerListBoxChoices, wx.LB_ALWAYS_SB|wx.LB_SINGLE|wx.LB_SORT )
 		bSizer8.Add( self.PlayerListBox, 1, wx.ALL|wx.EXPAND, 5 )
 
@@ -171,7 +172,7 @@ class CreateGameFrame ( wx.Frame ):
 class JoinGameFrame ( wx.Frame ):
 
 	def __init__( self, parent ):
-		wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = u"Join Game", pos = wx.DefaultPosition, size = wx.Size( 300,144 ), style = wx.CAPTION|wx.CLOSE_BOX|wx.MINIMIZE_BOX|wx.SYSTEM_MENU|wx.TAB_TRAVERSAL )
+		wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = u"Join Game", pos = wx.DefaultPosition, size = wx.Size( 300,144 ), style = wx.CAPTION|wx.MINIMIZE_BOX|wx.SYSTEM_MENU|wx.TAB_TRAVERSAL )
 
 		self.SetSizeHints( wx.DefaultSize, wx.DefaultSize )
 
@@ -222,20 +223,40 @@ class JoinGameFrame ( wx.Frame ):
 class WaitForStartFrame ( wx.Frame ):
 
 	def __init__( self, parent ):
-		wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = u"Waiting for start", pos = wx.DefaultPosition, size = wx.Size( 500,300 ), style = wx.CAPTION|wx.CLOSE_BOX|wx.MINIMIZE_BOX|wx.SYSTEM_MENU|wx.TAB_TRAVERSAL )
+		wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = u"Waiting for start", pos = wx.DefaultPosition, size = wx.Size( -1,-1 ), style = wx.CAPTION|wx.CLOSE_BOX|wx.MINIMIZE_BOX|wx.SYSTEM_MENU|wx.TAB_TRAVERSAL )
 
 		self.SetSizeHints( wx.DefaultSize, wx.DefaultSize )
 
 		bSizer17 = wx.BoxSizer( wx.VERTICAL )
 
+		self.m_staticText14 = wx.StaticText( self, wx.ID_ANY, u"Waiting for start", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_staticText14.Wrap( -1 )
+
+		bSizer17.Add( self.m_staticText14, 0, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, 5 )
+
+		self.LoadingAnimation = wx.adv.AnimationCtrl( self, wx.ID_ANY, wx.adv.NullAnimation, wx.DefaultPosition, wx.DefaultSize, wx.adv.AC_DEFAULT_STYLE )
+		self.LoadingAnimation.LoadFile( u"C:\\Users\\Matthew\\Desktop\\python\\PokerGame\\Blocks-1s-200px.gif" )
+
+		self.LoadingAnimation.Play()
+		bSizer17.Add( self.LoadingAnimation, 0, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, 5 )
+
 
 		self.SetSizer( bSizer17 )
 		self.Layout()
+		bSizer17.Fit( self )
 
 		self.Centre( wx.BOTH )
 
+		# Connect Events
+		self.Bind( wx.EVT_SHOW, self.OnShow )
+
 	def __del__( self ):
 		pass
+
+
+	# Virtual event handlers, overide them in your derived class
+	def OnShow( self, event ):
+		event.Skip()
 
 
 ###########################################################################
@@ -245,7 +266,7 @@ class WaitForStartFrame ( wx.Frame ):
 class InGameFrame ( wx.Frame ):
 
 	def __init__( self, parent ):
-		wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = u"Poker!", pos = wx.DefaultPosition, size = wx.Size( 500,300 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
+		wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = u"Poker!", pos = wx.DefaultPosition, size = wx.Size( 500,300 ), style = wx.CAPTION|wx.MINIMIZE_BOX|wx.SYSTEM_MENU|wx.TAB_TRAVERSAL )
 
 		self.SetSizeHints( wx.DefaultSize, wx.DefaultSize )
 
@@ -291,6 +312,9 @@ class InGameFrame ( wx.Frame ):
 		self.RaiseTextBox = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
 		bSizer24.Add( self.RaiseTextBox, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 
+		self.AllInButton = wx.Button( self, wx.ID_ANY, u"All in", wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT )
+		bSizer24.Add( self.AllInButton, 0, wx.ALL, 5 )
+
 
 		bSizer21.Add( bSizer24, 0, 0, 5 )
 
@@ -321,6 +345,7 @@ class InGameFrame ( wx.Frame ):
 		self.MatchButton.Bind( wx.EVT_BUTTON, self.Match )
 		self.RaiseButton.Bind( wx.EVT_BUTTON, self.Raise )
 		self.RaiseTextBox.Bind( wx.EVT_TEXT, self.OnText )
+		self.AllInButton.Bind( wx.EVT_BUTTON, self.AllIn )
 
 	def __del__( self ):
 		pass
@@ -340,6 +365,9 @@ class InGameFrame ( wx.Frame ):
 		event.Skip()
 
 	def OnText( self, event ):
+		event.Skip()
+
+	def AllIn( self, event ):
 		event.Skip()
 
 
@@ -394,6 +422,7 @@ class ChatFrame ( wx.Frame ):
 		bSizer18 = wx.BoxSizer( wx.VERTICAL )
 
 		self.ChatLogTextBox = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.TE_BESTWRAP|wx.TE_MULTILINE|wx.TE_READONLY )
+		self.ChatLogTextBox.SetMaxLength( 0 )
 		bSizer18.Add( self.ChatLogTextBox, 1, wx.ALL|wx.EXPAND, 5 )
 
 		bSizer19 = wx.BoxSizer( wx.HORIZONTAL )
@@ -443,7 +472,7 @@ class ChatFrame ( wx.Frame ):
 class TableCardsFrame ( wx.Frame ):
 
 	def __init__( self, parent ):
-		wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = u"Cards on table", pos = wx.DefaultPosition, size = wx.Size( 710,240 ), style = wx.CAPTION|wx.CLOSE_BOX|wx.MINIMIZE_BOX|wx.SYSTEM_MENU|wx.TAB_TRAVERSAL )
+		wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = u"Cards on table", pos = wx.DefaultPosition, size = wx.Size( 710,240 ), style = wx.CAPTION|wx.MINIMIZE_BOX|wx.SYSTEM_MENU|wx.TAB_TRAVERSAL )
 
 		self.SetSizeHints( wx.DefaultSize, wx.DefaultSize )
 
@@ -470,7 +499,15 @@ class TableCardsFrame ( wx.Frame ):
 
 		self.Centre( wx.BOTH )
 
+		# Connect Events
+		self.Bind( wx.EVT_SHOW, self.OnShow )
+
 	def __del__( self ):
 		pass
+
+
+	# Virtual event handlers, overide them in your derived class
+	def OnShow( self, event ):
+		event.Skip()
 
 
