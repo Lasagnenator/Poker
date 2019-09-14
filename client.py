@@ -16,6 +16,9 @@ turn = 0
 table = []
 
 started = False
+anything_changed = False
+
+lock = threading.Lock()
 
 def connect(addr):
     global connected
@@ -36,14 +39,16 @@ def chat(message):
     client_socket.sendall(payload.encode())
 
 def _handle_recv():
-    global chat_log, number, raise_by, pot, turn, player_number, started
+    global chat_log, number, raise_by, pot, turn, player_number, started, anything_changed
     while True:
         recv = client_socket.recv(4096)
         recv = recv.decode()
         head, data = recv.split("\n")[0], recv.split("\n")[1:]
-
+        lock.acquire()
         print("Client received text")
         print("\t",head, data)
+
+        
 
         if head=="INIT":
             #print("Initilisation")
@@ -55,6 +60,7 @@ def _handle_recv():
                 #if info.split("\x00")[0]==config.username:
                     #number = data.index(info)
             started = True
+            anything_changed = True
         if head=="INITCARD":
             #print("Card initilisation")
             player_number = int(data[0])
@@ -68,7 +74,8 @@ def _handle_recv():
             #print("Chat message")
             #chat message
             message = data[0]
-            chat_log += message+"\n"
+            chat_log = message+"\n"
+            #chat_log += message+"\n"
 
         if head=="GAME":
             #print("Gameplay action")
@@ -90,13 +97,16 @@ def _handle_recv():
                 pot += raise_by
             elif data[1]=="ALLIN":
                 player_info[number][2] = "All in"
-                player_info[number][1] = "0"
                 pot += int(player_info[number][1])
-                print(pot)
+                raise_by = max(raise_by, int(player_info[number][1]))
+                player_info[number][1] = "0"
+                #print(pot)
+            anything_changed = True
 
         if head=="TURN":
             #whose turn it is
             turn = int(data[0])
+            anything_changed = True
 
         if head=="TABLE":
             if data[0]=="FIRST3": #first 3 cards
@@ -107,6 +117,8 @@ def _handle_recv():
                 
             elif data[0]=="FIFTH": #fifth card
                 table.append(data[1])
+
+        lock.release()
 
 def handle_recv():
     t = threading.Thread(target=_handle_recv)

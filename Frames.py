@@ -132,8 +132,8 @@ class CreateGameFrame ( wx.Frame ):
 
 		bSizer12.Add( self.IPLabel, 0, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, 5 )
 
-		self.m_button5 = wx.Button( self, wx.ID_ANY, u"Start Game", wx.DefaultPosition, wx.DefaultSize, 0 )
-		bSizer12.Add( self.m_button5, 0, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, 5 )
+		self.StartGameButton = wx.Button( self, wx.ID_ANY, u"Start Game", wx.DefaultPosition, wx.DefaultSize, 0 )
+		bSizer12.Add( self.StartGameButton, 0, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, 5 )
 
 
 		bSizer10.Add( bSizer12, 1, wx.ALIGN_CENTER_VERTICAL, 5 )
@@ -148,7 +148,7 @@ class CreateGameFrame ( wx.Frame ):
 		# Connect Events
 		self.Bind( wx.EVT_CLOSE, self.Cancel )
 		self.Bind( wx.EVT_SHOW, self.OnShow )
-		self.m_button5.Bind( wx.EVT_BUTTON, self.StartGame )
+		self.StartGameButton.Bind( wx.EVT_BUTTON, self.StartGame )
 
 	def __del__( self ):
 		pass

@@ -4,6 +4,7 @@ import threading
 import cards
 import time
 import money
+import winner
 
 Server = socket.socket()
 alive = True
@@ -12,11 +13,15 @@ connected = []
 info = []
 hands = []
 table = []
-turn = 0
+turn = 1
 raise_by = 1
 pot = 0
 
+round_num = 0
+
 money.load_table()
+
+lock = threading.Lock()
 
 def update_connections():
     global connected, alive
@@ -74,9 +79,10 @@ def handle_recv(c_s):
         recv = c_s.recv(4096)
         recv = recv.decode()
         head, data = recv.split("\n")[0], recv.split("\n")[1:]
-        
+        lock.acquire()
         print("Server received text")
         print("\t", head, data)
+        
         
         if head=="INIT":
             username = data[0]
@@ -100,20 +106,24 @@ def handle_recv(c_s):
                 raise_by = int(data[1])
                 money.set_val(username, password, value)
                 pot += raise_by
+                info[number][2] = "RAISE"
             elif data[0]=="MATCH":
                 send_game(number, "MATCH")
                 value -= raise_by
                 money.set_val(username, password, value)
                 pot += raise_by
+                info[number][2] = "MATCH"
             elif data[0]=="ALLIN":
                 send_game(number, "ALLIN")
-                raise_by = value
+                raise_by = max(value, raise_by) #because an all in can be matched
                 pot += raise_by
                 value = 0
+                info[number][2] = "ALLIN"
 
             #need this otherwise client doesn't have enough time to react
             time.sleep(0.1)
             send_turn()
+        lock.release()
         
 def send_chat(name, message):
     head = "CHAT\n"
@@ -144,6 +154,8 @@ def deal_cards():
     deck = deck[player_num*2:]
     #add the community cards
     table.extend([deck[0], deck[1], deck[2], deck[3], deck[4]])
+    for i, card in enumerate(table):
+        
 
 def send_game(number, action, val=None):
     head = "GAME\n"
@@ -162,11 +174,19 @@ def send_turn():
     global turn
     head = "TURN\n"
     payload = head+str(turn)
-    send_to_all(payload.encode())
     turn += 1
+    try:
+        while info[turn][2]=="ALLIN":
+            payload = head+str(turn)
+            turn += 1
+    except:
+        pass
     if turn>=len(connected):
         turn = 0
-        check_end_of_round()
+
+    send_to_all(payload.encode())
+
+    check_end_of_round()
 
 def check_end_of_round():
     time.sleep(0.1)

@@ -57,6 +57,10 @@ class CreateGameFrame(Frames.CreateGameFrame):
         if waiting:
             wx.CallLater(500, self.UpdateScreen)
         count = len(socketstuff.server.connected)
+        if count<2:
+            self.StartGameButton.Enabled = False
+        else:
+            self.StartGameButton.Enabled = True
         self.PlayerCountLabel.SetLabel(str(count))
         decks = 1+count//10
         self.DecksUsedLabel.SetLabel(str(decks))
@@ -106,6 +110,10 @@ class InGameFrame(Frames.JoinGameFrame):
         self.InfoListCtrl.AppendColumn("Status")
         self.InfoListCtrl.Append(["Placeholder Name", "Money", "-"])
         running = True
+        self.Folded = False
+        self.Matched = False
+        self.Raised = False
+        self.AllIned = False
     def OnShow(self,event):
         global server_ip
         Chat.Show(True)
@@ -134,48 +142,64 @@ class InGameFrame(Frames.JoinGameFrame):
     def Fold(self,event):
         self.TurnOffAll()
         socketstuff.client.send_fold()
+        self.Folded = True
     def Match(self,event):
         socketstuff.client.send_match()
         self.TurnOffAll()
+        self.Matched = True
     def Raise(self,event):
         socketstuff.client.send_raise(self.RaiseTextBox.Value)
         self.TurnOffAll()
+        self.Raised = True
     def AllIn(self,event):
         self.TurnOffAll()
         socketstuff.client.send_all_in()
+        self.AllIned = True
 
     def TurnOffAll(self):
         self.FoldButton.Enabled=False
         self.MatchButton.Enabled=False
         self.RaiseButton.Enabled=False
-        self.RaiseTextBox.Value = ""
+        
         self.RaiseTextBox.Enabled=False
         self.AllInButton.Enabled=False
     
     def OnText(self,event):
         #check if the number put in is valid
-        self.RaiseButton.Enabled = True
-        self.MatchButton.Enabled = True
+        self.SetButtons()
+
+    def SetButtons(self):
+        self.TurnOffAll()
+        if not (self.AllIned or self.Folded):
+            self.FoldButton.Enabled = True
+            self.RaiseButton.Enabled = True
+            self.MatchButton.Enabled = True
+            self.RaiseTextBox.Enabled = True
+            self.AllInButton.Enabled = True
+            
+        else: #folded or went all in
+            return
+        
         try:
             proposed = int(self.RaiseTextBox.Value)
         except:
             self.RaiseButton.Enabled=False
-            return
+            proposed = float("inf")
+        
         money = int(self.FundsLabel.Label)
         current_raise = int(self.CurrentRaiseTextBox.Value)
         if proposed>money:
             self.RaiseButton.Enabled=False
-            return
+            
         if proposed <1:
             self.RaiseButton.Enabled=False
-            return
+
         if proposed <= current_raise:
             self.RaiseButton.Enabled=False
-            return
+
         if current_raise>=money:
-            self.RaiseButton.Enabled=False
             self.MatchButton.Enabled=False
-            return
+
 
     def Update(self):
         global running
@@ -184,6 +208,8 @@ class InGameFrame(Frames.JoinGameFrame):
             wx.CallLater(500, self.Update)
         else:
             return
+        if not socketstuff.client.anything_changed:
+            return
         self.InfoListCtrl.DeleteAllItems()
         for player in socketstuff.client.player_info:
             self.InfoListCtrl.Append(player)
@@ -191,14 +217,17 @@ class InGameFrame(Frames.JoinGameFrame):
         self.FundsLabel.Label = str(socketstuff.client.player_info[socketstuff.client.player_number][1])
         self.CurrentRaiseTextBox.Value = str(socketstuff.client.raise_by)
         self.CurrentPotTextBox.Value = str(socketstuff.client.pot)
-
-        if socketstuff.client.player_number==socketstuff.client.turn:
-            #our turn
-            self.FoldButton.Enabled = True
-            self.MatchButton.Enabled= True
-            self.RaiseButton.Enabled= True
-            self.RaiseTextBox.Enabled=True
-            self.AllInButton.Enabled= True
+        
+        self.TurnOffAll()
+        
+        if socketstuff.client.player_number==socketstuff.client.turn:#our turn
+            
+            status = socketstuff.client.player_info[socketstuff.client.player_number][2]
+            if status=="ALLIN" or status == "FOLD":
+                return
+            self.SetButtons()
+            
+        socketstuff.client.anything_changed = False
 
 class CardsFrame(Frames.CardsFrame):
     def __init__(self, parent):
@@ -243,7 +272,9 @@ class ChatFrame(Frames.ChatFrame):
             wx.CallLater(500, self.Update)
         else:
             return
-        self.ChatLogTextBox.Value = socketstuff.client.chat_log
+        #self.ChatLogTextBox.Value = socketstuff.client.chat_log
+        self.ChatLogTextBox.write(socketstuff.client.chat_log)
+        socketstuff.client.chat_log = ""
 
 class TableCardsFrame(Frames.TableCardsFrame):
     def __init__(self, parent):
