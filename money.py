@@ -21,3 +21,4 @@ def retrieve(username, password):
 
 def set_val(username, password, value):
     table[username+password] = value
+    save_table()

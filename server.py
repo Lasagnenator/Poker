@@ -16,8 +16,10 @@ table = []
 turn = 1
 raise_by = 1
 pot = 0
+cards_visible = 0
 
 round_num = 0
+match_count = 0
 
 money.load_table()
 
@@ -118,6 +120,7 @@ def handle_recv(c_s):
                 raise_by = max(value, raise_by) #because an all in can be matched
                 pot += raise_by
                 value = 0
+                money.set_val(username, password, value)
                 info[number][2] = "ALLIN"
 
             #need this otherwise client doesn't have enough time to react
@@ -154,8 +157,6 @@ def deal_cards():
     deck = deck[player_num*2:]
     #add the community cards
     table.extend([deck[0], deck[1], deck[2], deck[3], deck[4]])
-    for i, card in enumerate(table):
-        
 
 def send_game(number, action, val=None):
     head = "GAME\n"
@@ -174,11 +175,14 @@ def send_turn():
     global turn
     head = "TURN\n"
     payload = head+str(turn)
+    old = turn
     turn += 1
     try:
-        while info[turn][2]=="ALLIN":
+        while info[turn][2]=="ALLIN" or info[turn][2]=="FOLD":
             payload = head+str(turn)
-            turn += 1
+            turn += 1 #skip a person if they folded or went all-in 
+            if turn==old:
+                break
     except:
         pass
     if turn>=len(connected):
@@ -186,9 +190,18 @@ def send_turn():
 
     send_to_all(payload.encode())
 
-    check_end_of_round()
+    check_round()
 
-def check_end_of_round():
+def check_round():
+    #this is run at the end of a send_turn call
+    global round_num, info, cards_visible, match_count
+    for player in info:
+        if player[2]=="MATCH":
+            match_count += 1
+        if player[2]=="ALLIN":
+            match_count += 1
+        if player[2]=="FOLD":
+            match_count += 1
     time.sleep(0.1)
     send_table("FIRST3")
     time.sleep(0.1)
@@ -197,12 +210,15 @@ def check_end_of_round():
     send_table("FIFTH")
 
 def send_table(which):
-    global table
+    global table, cards_visible
     head = "TABLE\n"
     if which=="FIRST3":
+        cards_visible = 3
         payload = head + "FIRST3\n" + table[0]+"\n" + table[1]+"\n" + table[2]
     elif which=="FOURTH":
+        cards_visible = 4
         payload = head + "FOURTH\n" + table[3]
     elif which=="FIFTH":
+        cards_visible = 5
         payload = head + "FIFTH\n" + table[4]
     send_to_all(payload.encode())
