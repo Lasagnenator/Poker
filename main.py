@@ -108,7 +108,8 @@ class InGameFrame(Frames.JoinGameFrame):
         self.InfoListCtrl.AppendColumn("Name")
         self.InfoListCtrl.AppendColumn("Money")
         self.InfoListCtrl.AppendColumn("Status")
-        self.InfoListCtrl.Append(["Placeholder Name", "Money", "-"])
+        self.InfoListCtrl.AppendColumn("Turn")
+        self.InfoListCtrl.Append(["Placeholder Name", "Money", "-", ""])
         running = True
         self.Folded = False
         self.Matched = False

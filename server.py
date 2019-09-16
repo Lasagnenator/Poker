@@ -189,12 +189,13 @@ def send_turn():
     payload = head+str(turn)
     try:
         while info[turn][2]=="ALLIN" or info[turn][2]=="FOLD":
-            payload = head+str(turn)
             turn += 1 #skip a person if they folded or went all-in
             if turn>=len(connected):
                 turn = 0
+            payload = head+str(turn)
             if turn==old: #break if we looped around
                 break
+            
             check_round()
     except BaseException as e:
         print(e.args)
@@ -211,9 +212,9 @@ def check_round():
     #this is run at the end of a send_turn call
     global round_num, info, cards_visible, match_count, last_raise
 
-    print("last_raise =", last_raise)
-    print("info =", info)
-    print("turn =", turn)
+    #print("last_raise =", last_raise)
+    #print("info =", info)
+    #print("turn =", turn)
 
     if turn != last_raise: #only start checking once we are back to last raise
         return
@@ -226,10 +227,10 @@ def check_round():
         if player[2]=="FOLD":
             match_count += 1
 
-    print("match_count =", match_count)
+    #print("match_count =", match_count)
 
     if match_count==len(info)-1: # everyone else matched
-        print("cards_visible =", cards_visible)
+        #print("cards_visible =", cards_visible)
         match_count = 0
         if cards_visible==0:
             send_table("FIRST3")
@@ -238,6 +239,8 @@ def check_round():
         elif cards_visible==4:
             send_table("FIFTH")
         elif cards_visible==5:
+            #print("determining winner")
+            #print("revealing cards")
             #determine winner now
             pass
 
@@ -256,3 +259,10 @@ def send_table(which):
         cards_visible = 5
         payload = head + "FIFTH\n" + table[4]
     send_to_all(payload.encode())
+
+def reveal_cards():
+    head = "REVEAL\n"
+    pass
+
+def find_winner():
+    pass

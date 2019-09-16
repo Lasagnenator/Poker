@@ -185,7 +185,7 @@ class JoinGameFrame ( wx.Frame ):
 
 		bSizer16.Add( self.m_staticText14, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 
-		self.IPTextBox = wx.TextCtrl( self, wx.ID_ANY, u"192.168.2.99", wx.DefaultPosition, wx.DefaultSize, wx.TE_CENTER )
+		self.IPTextBox = wx.TextCtrl( self, wx.ID_ANY, u"localhost", wx.DefaultPosition, wx.DefaultSize, wx.TE_CENTER )
 		bSizer16.Add( self.IPTextBox, 1, wx.ALL, 5 )
 
 
@@ -223,7 +223,7 @@ class JoinGameFrame ( wx.Frame ):
 class WaitForStartFrame ( wx.Frame ):
 
 	def __init__( self, parent ):
-		wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = u"Waiting for start", pos = wx.DefaultPosition, size = wx.Size( -1,-1 ), style = wx.CAPTION|wx.CLOSE_BOX|wx.MINIMIZE_BOX|wx.SYSTEM_MENU|wx.TAB_TRAVERSAL )
+		wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = u"Waiting for start", pos = wx.DefaultPosition, size = wx.Size( -1,-1 ), style = wx.CAPTION|wx.MINIMIZE_BOX|wx.SYSTEM_MENU|wx.TAB_TRAVERSAL )
 
 		self.SetSizeHints( wx.DefaultSize, wx.DefaultSize )
 
@@ -235,7 +235,7 @@ class WaitForStartFrame ( wx.Frame ):
 		bSizer17.Add( self.m_staticText14, 0, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, 5 )
 
 		self.LoadingAnimation = wx.adv.AnimationCtrl( self, wx.ID_ANY, wx.adv.NullAnimation, wx.DefaultPosition, wx.DefaultSize, wx.adv.AC_DEFAULT_STYLE )
-		self.LoadingAnimation.LoadFile( u".\\Blocks-1s-200px.gif" )
+		self.LoadingAnimation.LoadFile( u"C:\\Users\\Matthew\\Desktop\\python\\PokerGame\\Blocks-1s-200px.gif" )
 
 		self.LoadingAnimation.Play()
 		bSizer17.Add( self.LoadingAnimation, 0, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, 5 )

@@ -56,7 +56,7 @@ def _handle_recv():
                 #name, money, status
                 if not "\x00" in info:
                     break
-                player_info.append([*info.split("\x00"), "-"])
+                player_info.append([*info.split("\x00"), "-", ""])
                 #if info.split("\x00")[0]==config.username:
                     #number = data.index(info)
             started = True
@@ -106,6 +106,9 @@ def _handle_recv():
         if head=="TURN":
             #whose turn it is
             turn = int(data[0])
+            for i in range(len(player_info)):
+                player_info[i][3] = ""
+            player_info[turn][3] = "Turn"
             anything_changed = True
 
         if head=="TABLE":
