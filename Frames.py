@@ -309,11 +309,11 @@ class InGameFrame ( wx.Frame ):
 
 		bSizer24.Add( self.RaiseButton, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 
-		self.RaiseTextBox = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-		bSizer24.Add( self.RaiseTextBox, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
+		self.RaiseSlider = wx.Slider( self, wx.ID_ANY, 50, 1, 100, wx.DefaultPosition, wx.DefaultSize, wx.SL_BOTH|wx.SL_HORIZONTAL|wx.SL_LABELS )
+		bSizer24.Add( self.RaiseSlider, 1, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 
 		self.AllInButton = wx.Button( self, wx.ID_ANY, u"All in", wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT )
-		bSizer24.Add( self.AllInButton, 0, wx.ALL, 5 )
+		bSizer24.Add( self.AllInButton, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 
 
 		bSizer21.Add( bSizer24, 0, 0, 5 )
@@ -344,7 +344,7 @@ class InGameFrame ( wx.Frame ):
 		self.FoldButton.Bind( wx.EVT_BUTTON, self.Fold )
 		self.MatchButton.Bind( wx.EVT_BUTTON, self.Match )
 		self.RaiseButton.Bind( wx.EVT_BUTTON, self.Raise )
-		self.RaiseTextBox.Bind( wx.EVT_TEXT, self.OnText )
+		self.RaiseSlider.Bind( wx.EVT_SLIDER, self.OnSlider )
 		self.AllInButton.Bind( wx.EVT_BUTTON, self.AllIn )
 
 	def __del__( self ):
@@ -364,7 +364,7 @@ class InGameFrame ( wx.Frame ):
 	def Raise( self, event ):
 		event.Skip()
 
-	def OnText( self, event ):
+	def OnSlider( self, event ):
 		event.Skip()
 
 	def AllIn( self, event ):

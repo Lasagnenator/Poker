@@ -79,7 +79,12 @@ def handle_recv(c_s):
     global raise_by, info, pot, last_raise
     number = connected.index(c_s)
     while server_running:
-        recv = c_s.recv(4096)
+        try:
+            recv = c_s.recv(4096)
+        except ConnectionResetError:
+            send_game(number, "FOLD")
+            print("Player",number,"disconnected.")
+            return
         recv = recv.decode()
         head, data = recv.split("\n")[0], recv.split("\n")[1:]
         

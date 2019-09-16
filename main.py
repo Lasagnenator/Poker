@@ -144,30 +144,30 @@ class InGameFrame(Frames.JoinGameFrame):
         self.TurnOffAll()
         socketstuff.client.send_fold()
         self.Folded = True
-        self.RaiseTextBox.Enabled=False
+        self.RaiseSlider.Enabled=False
     def Match(self,event):
         socketstuff.client.send_match()
         self.TurnOffAll()
         self.Matched = True
     def Raise(self,event):
-        socketstuff.client.send_raise(self.RaiseTextBox.Value)
+        socketstuff.client.send_raise(self.RaiseSlider.Value)
         self.TurnOffAll()
         self.Raised = True
     def AllIn(self,event):
         self.TurnOffAll()
         socketstuff.client.send_all_in()
         self.AllIned = True
-        self.RaiseTextBox.Enabled=False
+        self.RaiseSlider.Enabled=False
 
     def TurnOffAll(self):
         self.FoldButton.Enabled=False
         self.MatchButton.Enabled=False
         self.RaiseButton.Enabled=False
         
-        #self.RaiseTextBox.Enabled=False
+        #self.RaiseSlider.Enabled=False
         self.AllInButton.Enabled=False
     
-    def OnText(self,event):
+    def OnSlider(self,event):
         #check if the number put in is valid
         self.SetButtons()
 
@@ -177,14 +177,14 @@ class InGameFrame(Frames.JoinGameFrame):
             self.FoldButton.Enabled = True
             self.RaiseButton.Enabled = True
             self.MatchButton.Enabled = True
-            self.RaiseTextBox.Enabled = True
+            self.RaiseSlider.Enabled = True
             self.AllInButton.Enabled = True
             
         else: #folded or went all in
             return
         
         try:
-            proposed = int(self.RaiseTextBox.Value)
+            proposed = int(self.RaiseSlider.Value)
         except:
             self.RaiseButton.Enabled=False
             proposed = float("inf")
@@ -221,6 +221,12 @@ class InGameFrame(Frames.JoinGameFrame):
         self.FundsLabel.Label = str(socketstuff.client.player_info[socketstuff.client.player_number][1])
         self.CurrentRaiseTextBox.Value = str(socketstuff.client.raise_by)
         self.CurrentPotTextBox.Value = str(socketstuff.client.pot)
+
+        try:
+            self.RaiseSlider.SetMin(int(self.CurrentRaiseTextBox.Value)+1)
+            self.RaiseSlider.SetMax(int(self.FundsLabel.Label)-1)
+        except:
+            pass
         
         self.TurnOffAll()
         
