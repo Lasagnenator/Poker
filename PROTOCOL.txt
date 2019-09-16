@@ -42,7 +42,7 @@ GAME\n
 <player number>\n
 RAISE\n<n> | FOLD | MATCH | ALLIN
 
---TURN PROTOCOL    -- sent individually
+--TURN PROTOCOL    -- sent to every player
 TURN\n
 <number>
 

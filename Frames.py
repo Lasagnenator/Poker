@@ -235,7 +235,7 @@ class WaitForStartFrame ( wx.Frame ):
 		bSizer17.Add( self.m_staticText14, 0, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, 5 )
 
 		self.LoadingAnimation = wx.adv.AnimationCtrl( self, wx.ID_ANY, wx.adv.NullAnimation, wx.DefaultPosition, wx.DefaultSize, wx.adv.AC_DEFAULT_STYLE )
-		self.LoadingAnimation.LoadFile( u"C:\\Users\\Matthew\\Desktop\\python\\PokerGame\\Blocks-1s-200px.gif" )
+		self.LoadingAnimation.LoadFile( u".\\Blocks-1s-200px.gif" )
 
 		self.LoadingAnimation.Play()
 		bSizer17.Add( self.LoadingAnimation, 0, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, 5 )

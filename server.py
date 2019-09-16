@@ -13,10 +13,11 @@ connected = []
 info = []
 hands = []
 table = []
-turn = 1
+turn = 0
 raise_by = 1
 pot = 0
 cards_visible = 0
+last_raise = 0
 
 round_num = 0
 match_count = 0
@@ -75,16 +76,17 @@ def send_init():
     send_to_all(payload)
 
 def handle_recv(c_s):
-    global raise_by, info, pot
+    global raise_by, info, pot, last_raise
     number = connected.index(c_s)
     while server_running:
         recv = c_s.recv(4096)
         recv = recv.decode()
         head, data = recv.split("\n")[0], recv.split("\n")[1:]
+        
         lock.acquire()
+        
         print("Server received text")
         print("\t", head, data)
-        
         
         if head=="INIT":
             username = data[0]
@@ -109,6 +111,7 @@ def handle_recv(c_s):
                 money.set_val(username, password, value)
                 pot += raise_by
                 info[number][2] = "RAISE"
+                last_raise = number
             elif data[0]=="MATCH":
                 send_game(number, "MATCH")
                 value -= raise_by
@@ -117,14 +120,17 @@ def handle_recv(c_s):
                 info[number][2] = "MATCH"
             elif data[0]=="ALLIN":
                 send_game(number, "ALLIN")
-                raise_by = max(value, raise_by) #because an all in can be matched
+                raise_by = max(value, raise_by) #because an all in can match higher raise
                 pot += raise_by
+                if value>raise_by:
+                    last_raise = number #higher so this is the latest raise
                 value = 0
                 money.set_val(username, password, value)
                 info[number][2] = "ALLIN"
 
             #need this otherwise client doesn't have enough time to react
             time.sleep(0.1)
+            info[number][1] = str(value)
             send_turn()
         lock.release()
         
@@ -174,27 +180,44 @@ def send_game(number, action, val=None):
 def send_turn():
     global turn
     head = "TURN\n"
-    payload = head+str(turn)
+    #payload = head+str(turn)
     old = turn
     turn += 1
-    try:
-        while info[turn][2]=="ALLIN" or info[turn][2]=="FOLD":
-            payload = head+str(turn)
-            turn += 1 #skip a person if they folded or went all-in 
-            if turn==old:
-                break
-    except:
-        pass
     if turn>=len(connected):
         turn = 0
 
+    payload = head+str(turn)
+    try:
+        while info[turn][2]=="ALLIN" or info[turn][2]=="FOLD":
+            payload = head+str(turn)
+            turn += 1 #skip a person if they folded or went all-in
+            if turn>=len(connected):
+                turn = 0
+            if turn==old: #break if we looped around
+                break
+            check_round()
+    except BaseException as e:
+        print(e.args)
+        pass
+    
+    #print("here")
     send_to_all(payload.encode())
+
+    time.sleep(0.5)
 
     check_round()
 
 def check_round():
     #this is run at the end of a send_turn call
-    global round_num, info, cards_visible, match_count
+    global round_num, info, cards_visible, match_count, last_raise
+
+    print("last_raise =", last_raise)
+    print("info =", info)
+    print("turn =", turn)
+
+    if turn != last_raise: #only start checking once we are back to last raise
+        return
+
     for player in info:
         if player[2]=="MATCH":
             match_count += 1
@@ -202,12 +225,23 @@ def check_round():
             match_count += 1
         if player[2]=="FOLD":
             match_count += 1
-    time.sleep(0.1)
-    send_table("FIRST3")
-    time.sleep(0.1)
-    send_table("FOURTH")
-    time.sleep(0.1)
-    send_table("FIFTH")
+
+    print("match_count =", match_count)
+
+    if match_count==len(info)-1: # everyone else matched
+        print("cards_visible =", cards_visible)
+        match_count = 0
+        if cards_visible==0:
+            send_table("FIRST3")
+        elif cards_visible==3:
+            send_table("FOURTH")
+        elif cards_visible==4:
+            send_table("FIFTH")
+        elif cards_visible==5:
+            #determine winner now
+            pass
+
+    match_count = 0
 
 def send_table(which):
     global table, cards_visible

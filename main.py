@@ -143,6 +143,7 @@ class InGameFrame(Frames.JoinGameFrame):
         self.TurnOffAll()
         socketstuff.client.send_fold()
         self.Folded = True
+        self.RaiseTextBox.Enabled=False
     def Match(self,event):
         socketstuff.client.send_match()
         self.TurnOffAll()
@@ -155,13 +156,14 @@ class InGameFrame(Frames.JoinGameFrame):
         self.TurnOffAll()
         socketstuff.client.send_all_in()
         self.AllIned = True
+        self.RaiseTextBox.Enabled=False
 
     def TurnOffAll(self):
         self.FoldButton.Enabled=False
         self.MatchButton.Enabled=False
         self.RaiseButton.Enabled=False
         
-        self.RaiseTextBox.Enabled=False
+        #self.RaiseTextBox.Enabled=False
         self.AllInButton.Enabled=False
     
     def OnText(self,event):
@@ -188,6 +190,7 @@ class InGameFrame(Frames.JoinGameFrame):
         
         money = int(self.FundsLabel.Label)
         current_raise = int(self.CurrentRaiseTextBox.Value)
+        self.AllInButton.Enabled = True
         if proposed>money:
             self.RaiseButton.Enabled=False
             
