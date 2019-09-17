@@ -65,7 +65,10 @@ def send_to_all(payload):
     except:
         pass #already encoded
     for c_s in connected:
-        c_s.sendall(payload)
+        try:
+            c_s.sendall(payload)
+        except ConnectionResetError:
+            pass
 
 def send_init():
     head = "INIT\n"
@@ -87,6 +90,8 @@ def handle_recv(c_s):
             send_game(number, "FOLD")
             info[number][2] = "FOLD"
             print("Player",number,"disconnected.")
+            if turn==number:
+                send_turn()
             return
         recv = recv.decode()
         head, data = recv.split("\n")[0], recv.split("\n")[1:]

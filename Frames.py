@@ -314,7 +314,7 @@ class InGameFrame ( wx.Frame ):
 		self.RaiseSlider = wx.Slider( self, wx.ID_ANY, 2, 1, 100, wx.DefaultPosition, wx.Size( 250,-1 ), wx.SL_BOTH|wx.SL_HORIZONTAL )
 		bSizer19.Add( self.RaiseSlider, 1, wx.ALL|wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5 )
 
-		self.SliderValueLabel = wx.StaticText( self, wx.ID_ANY, u"2", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.SliderValueLabel = wx.StaticText( self, wx.ID_ANY, u"2", wx.DefaultPosition, wx.DefaultSize, wx.ALIGN_CENTER_HORIZONTAL )
 		self.SliderValueLabel.Wrap( -1 )
 
 		bSizer19.Add( self.SliderValueLabel, 0, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, 5 )
