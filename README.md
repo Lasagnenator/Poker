@@ -4,15 +4,15 @@ wxPython >= 4.0.3 (made with 4.0.3, untested in higher versions)
 
 # Usage
 
-1.Edit the config.ini file with your username and password
+1. Edit the config.ini file with your username and password
 
-2.Run main.py (or poker.exe if from release)
+2. Run main.py (or poker.exe if from release)
 
-3.Keep an eye on the black terminal window
+3. Keep an eye on the black terminal window
 
-4.Follow on-screen prompts. After hiting join game, when there is a waiting screen, it means that the server starter needs to press the `start game` button. When this button is hit, the game starts and everyone is shown their windows.
+4. Follow on-screen prompts. After hiting join game, when there is a waiting screen, it means that the server starter needs to press the `start game` button. When this button is hit, the game starts and everyone is shown their windows.
 
-5.During the game, you cannot leave as leaving will surrender your current bet and the game will continue without you. (a disconnect counts as a fold)
+5. During the game, you cannot leave as leaving will surrender your current bet and the game will continue without you. (a disconnect counts as a fold)
 
 # Important notes
 
