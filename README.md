@@ -23,6 +23,8 @@ pyinstaller >= 3.4 (only needed for distributing binaries)
 
 * The rules around the community cards are changed
 
+* To reveal cards on the table, at least one raise must happen and all other players need to fold, go all-in or match the raise.
+
 #### Fold
 
 When this is pressed, you are telling the server that you surrender your bet and you will not be able to participate for the rest of the round (you can still watch though). 
