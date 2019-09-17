@@ -1,9 +1,10 @@
 pyinstaller main.py --name=Poker -y
 
-robocopy "." "dist/Poker" database.json
-robocopy "." "dist/Poker" config.ini
+cp "./database.json" "./dist/Poker"
+cp "./config.ini" "./dist/Poker"
+cp "./Blocks-1s-200px.gif" "./dist/Poker"
 
-robocopy "Cards" "dist/Poker/Cards" 
+cp -R "./Cards" "./dist/Poker/Cards"
 
 7z a -r "dist/Poker.zip" "dist/Poker/*.*"
 
