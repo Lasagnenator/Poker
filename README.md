@@ -1,6 +1,7 @@
 # Dependecies
 
 wxPython >= 4.0.3 (made with 4.0.3, untested in higher versions)
+pyinstaller >= 3.4 (only needed for distributing binaries)
 
 # Usage
 
@@ -49,3 +50,7 @@ This button is only disabled when you fold.
 #### Cards and winners
 
 Standard poker rankings apply. However, these hands can be formed from **ALL** of the community cards where as in Texas Hold'em, only the top 3 cards are used for making hands. This means that there are 7 cards to make a hand from, increasing chances of getting high plays. In the event of a tie, the pot is shared equally amongst winners with fractional part rounded up.
+
+# Building
+
+To disribute a binary after edits, run compile.bat (or compile.sh depending on platform). This will create a binary in the folder dist/Poker. It also creates a zip of the Poker folder (requires 7-zip) ready for distribution.
