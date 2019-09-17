@@ -22,6 +22,8 @@ last_raise = 0
 round_num = 0
 match_count = 0
 
+user_pass = []
+
 money.load_table()
 
 lock = threading.Lock()
@@ -83,6 +85,7 @@ def handle_recv(c_s):
             recv = c_s.recv(4096)
         except ConnectionResetError:
             send_game(number, "FOLD")
+            info[number][2] = "FOLD"
             print("Player",number,"disconnected.")
             return
         recv = recv.decode()
@@ -98,6 +101,7 @@ def handle_recv(c_s):
             password = data[1]
             value = money.retrieve(username, password)
             info.append([username, str(value), ""])
+            user_pass.append([username, password])
             #print(info)
             
         elif head=="CHAT":
@@ -138,6 +142,8 @@ def handle_recv(c_s):
             info[number][1] = str(value)
             send_turn()
         lock.release()
+    c_s.shutdown(0)
+    c_s.close()
         
 def send_chat(name, message):
     head = "CHAT\n"
@@ -224,13 +230,17 @@ def check_round():
     if turn != last_raise: #only start checking once we are back to last raise
         return
 
+    auto_skip_count = 0
+
     for player in info:
         if player[2]=="MATCH":
             match_count += 1
         if player[2]=="ALLIN":
             match_count += 1
+            auto_skip_count += 1
         if player[2]=="FOLD":
             match_count += 1
+            auto_skip_count += 1
 
     #print("match_count =", match_count)
 
@@ -239,15 +249,34 @@ def check_round():
         match_count = 0
         if cards_visible==0:
             send_table("FIRST3")
+            if auto_skip_count==len(info)-1:
+                #auto complete
+                time.sleep(0.1)
+                send_table("FOURTH")
+                time.sleep(0.1)
+                send_table("FIFTH")
+                time.sleep(0.1)
+                reveal_cards()
+                find_winner()
+                
         elif cards_visible==3:
             send_table("FOURTH")
+            if auto_skip_count==len(info)-1:
+                time.sleep(0.1)
+                send_table("FIFTH")
+                time.sleep(0.1)
+                reveal_cards()
+                find_winner()
+                
         elif cards_visible==4:
             send_table("FIFTH")
+            if auto_skip_count==len(info)-1:
+                time.sleep(0.1)
+                reveal_cards()
+                find_winner()
         elif cards_visible==5:
-            #print("determining winner")
-            #print("revealing cards")
-            #determine winner now
-            pass
+            reveal_cards()
+            find_winner()
 
     match_count = 0
 
@@ -267,7 +296,40 @@ def send_table(which):
 
 def reveal_cards():
     head = "REVEAL\n"
-    pass
+    payload = head
+    for i, hand in enumerate(hands):
+        temp = winner.fname_to_cards(hand)
+        payload += temp[0]+"\x00"+temp[1]+"\n"
+    payload = payload[:-1] #remove the trailing newline
+    send_to_all(payload.encode())
 
 def find_winner():
+    global server_running
+    allowed = []
+    for i, hand in enumerate(hands):
+        if info[i][2]!="FOLD":
+            allowed.append(hand)
+
+    best_hands, win_type = winner.determine_winner(allowed, table)
+    win_nums = []
+    for hand in best_hands:
+        win_nums.append(str(hands.index(hand)))
+
+    #distribute pot
+    winner_count = len(win_nums)
+    amount = (pot//winner_count)+ (pot%winner_count>0) #rounds up
+
+    for num in win_nums:
+        username, password = user_pass[int(num)]
+        value = money.retrieve(username, password)
+        value += amount
+        money.set_val(username, password, value)
+        info[int(num)][1] = str(value)
+    money.save_table()
+
+    head = "WINNER\n"
+    payload = head+"\x00".join(win_nums)+"\n"+win_type+"\n"+str(amount)
+    send_to_all(payload.encode())
+    server_running = False
+    
     pass

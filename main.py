@@ -170,6 +170,7 @@ class InGameFrame(Frames.JoinGameFrame):
     def OnSlider(self,event):
         #check if the number put in is valid
         self.SetButtons()
+        self.SliderValueLabel.SetLabel(str(self.RaiseSlider.Value))
 
     def SetButtons(self):
         self.TurnOffAll()
@@ -208,11 +209,12 @@ class InGameFrame(Frames.JoinGameFrame):
     def Update(self):
         global running
         #updates the list ctrl
-        if running:
-            wx.CallLater(500, self.Update)
-        else:
-            return
+        
         if not socketstuff.client.anything_changed:
+            if running:
+                wx.CallLater(500, self.Update)
+            else:
+                return
             return
         self.InfoListCtrl.DeleteAllItems()
         for player in socketstuff.client.player_info:
@@ -224,6 +226,7 @@ class InGameFrame(Frames.JoinGameFrame):
 
         try:
             self.RaiseSlider.SetMin(int(self.CurrentRaiseTextBox.Value)+1)
+            self.RaiseSlider.SetValue(int(self.CurrentRaiseTextBox.Value)+1)
             self.RaiseSlider.SetMax(int(self.FundsLabel.Label)-1)
         except:
             pass
@@ -236,8 +239,35 @@ class InGameFrame(Frames.JoinGameFrame):
             if status=="ALLIN" or status == "FOLD":
                 return
             self.SetButtons()
+
+        if socketstuff.client.finished:
+            header = self.InfoListCtrl.GetColumn(3)
+            header.SetText("Cards")
+            self.InfoListCtrl.SetColumn(3, header)
+            self.InfoListCtrl.DeleteAllItems()
+            for i, player in enumerate(socketstuff.client.player_info):
+                cards = ", ".join(socketstuff.client.hands[i])
+                self.InfoListCtrl.Append(player[:-1]+[cards])
+            
+        if socketstuff.client.winners!=[]: #winner found
+            names = []
+            for num in socketstuff.client.winners:
+                names.append(socketstuff.client.player_info[num][0])
+
+            message = "Winning Players: " + ", ".join(names) + "\neach won " +\
+                      socketstuff.client.win_amount+\
+                      " with type: " + socketstuff.client.win_type + "."
+
+            wx.MessageBox(message, caption="Winners!")
+            socketstuff.server.server_running = False
+            return
             
         socketstuff.client.anything_changed = False
+
+        if running:
+            wx.CallLater(500, self.Update)
+        else:
+            return
 
 class CardsFrame(Frames.CardsFrame):
     def __init__(self, parent):

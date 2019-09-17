@@ -91,7 +91,9 @@ def is_pair(cards):
         return [cards[3][0], *sort_cards([cards[0][0], cards[1][0], cards[2][0]])]
     return False
 
-comb_order = ["STRAIGHTFLUSH", "FOUR", "FULL", "FLUSH", "STRAIGHT", "TRIPLE", "TWOPAIR", "PAIR", "NONE"]
+comb_order = ["Straight flush", "Four of a kind", "Full house",
+              "Flush", "Straight", "Three of a kind", "Two pairs",
+              "Pair", "High card"]
 def sort_highest(combs):
     #all seven cards
     #determines highest value combination
@@ -134,24 +136,32 @@ def get_highest_comb(cards):
     for five in itertools.combinations(cards, 5): #21 different combinations
         play = sort_cards(five, reverse=False)
         
-        if is_flush(play) and is_straight(play):
-            plays.append(("STRAIGHTFLUSH", is_straight(play)))
-        elif is_four(play):
-            plays.append(("FOUR", *is_four(play)))
-        elif is_full_house(play):
-            plays.append(("FULL", *is_full_house(play)))
-        elif is_flush(play):
-            plays.append(("FLUSH", *is_flush(play)))
-        elif is_straight(play):
-            plays.append(("STRAIGHT", is_straight(play)))
-        elif is_triple(play):
-            plays.append(("TRIPLE", *is_triple(play)))
-        elif is_two_pair(play):
-            plays.append(("TWOPAIR", *is_two_pair(play)))
-        elif is_pair(play):
-            plays.append(("PAIR", *is_pair(play)))
-        else:
-            plays.append(("NONE", *strip_suits(sort_cards(play))))
+        if is_flush(play) and is_straight(play): #straight flush
+            plays.append((comb_order[0], is_straight(play)))
+            
+        elif is_four(play): #four of a kind
+            plays.append((comb_order[1], *is_four(play)))
+            
+        elif is_full_house(play): #full house
+            plays.append((comb_order[2], *is_full_house(play)))
+            
+        elif is_flush(play): #flush
+            plays.append((comb_order[3], *is_flush(play)))
+            
+        elif is_straight(play): #straight
+            plays.append((comb_order[4], is_straight(play)))
+            
+        elif is_triple(play): #three of a kind
+            plays.append((comb_order[5], *is_triple(play)))
+            
+        elif is_two_pair(play): #two pair
+            plays.append((comb_order[6], *is_two_pair(play)))
+            
+        elif is_pair(play): #pair
+            plays.append((comb_order[7], *is_pair(play)))
+            
+        else: #highcard
+            plays.append((comb_order[8], *strip_suits(sort_cards(play))))
     #print(plays)
     #remove duplicates
     plays = list(set(plays))
@@ -188,6 +198,7 @@ def compare_hand(p1_hand, p2_hand):
 def determine_winner_cards(_player_hands, table_cards):
     #list of 2-card hands and the 5 on table
     #determines the winner
+    #returns the wining hand and type of win
     player_hands = []
     for i in range(len(_player_hands)):
         player_hands.append(_player_hands[i]+table_cards)
@@ -200,7 +211,12 @@ def determine_winner_cards(_player_hands, table_cards):
             best = [i]
         if comp==0: #tie
             best.append(i)
-    return best
+
+    #return best
+
+    win_type = get_highest_comb(player_hands[best[0]])[0]
+
+    return best, win_type
 
 def fname_to_cards(fnames):
     cards = []
@@ -251,4 +267,10 @@ def determine_winner(fnames_hands, fnames_table):
         hands.append(fname_to_cards(hand))
     table = fname_to_cards(fnames_table)
 
-    return determine_winner_cards(hands, table)
+    best, win_type = determine_winner_cards(hands, table)
+
+    best_hands = []
+    for i in best:
+        best_hands.append(fnames_hands[i])
+
+    return best_hands, win_type

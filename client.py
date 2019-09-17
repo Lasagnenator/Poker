@@ -1,6 +1,7 @@
 import config
 import socket
 import threading
+import time
 
 client_socket = socket.socket()
 connected = False
@@ -15,13 +16,19 @@ pot = 0
 turn = 0
 table = []
 
+hands = []
+
+winners = []
+win_type = ""
+win_amount = 0
+
 started = False
 anything_changed = False
+finished = False
 
 lock = threading.Lock()
 
 def connect(addr):
-    global connected
     client_socket.connect((addr, config.port))
     #send init protocol
     head = "INIT\n"
@@ -40,9 +47,12 @@ def chat(message):
 
 def _handle_recv():
     global chat_log, number, raise_by, pot, turn, player_number, started, anything_changed
+    global finished, winners, win_type, win_amount
     while True:
         recv = client_socket.recv(4096)
         recv = recv.decode()
+        if recv=="":
+            break
         head, data = recv.split("\n")[0], recv.split("\n")[1:]
         lock.acquire()
         print("Client received text")
@@ -120,6 +130,19 @@ def _handle_recv():
                 
             elif data[0]=="FIFTH": #fifth card
                 table.append(data[1])
+
+        if head=="REVEAL":
+            for item in data:
+                hands.append(item.split("\x00"))
+            anything_changed = True
+            finished = True
+
+        if head=="WINNER":
+            for winner in data[0].split("\x00"):
+                winners.append(int(winner))
+            win_type = data[1]
+            win_amount = data[2]
+            anything_changed = True
 
         lock.release()
 

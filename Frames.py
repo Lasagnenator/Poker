@@ -235,7 +235,7 @@ class WaitForStartFrame ( wx.Frame ):
 		bSizer17.Add( self.m_staticText14, 0, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, 5 )
 
 		self.LoadingAnimation = wx.adv.AnimationCtrl( self, wx.ID_ANY, wx.adv.NullAnimation, wx.DefaultPosition, wx.DefaultSize, wx.adv.AC_DEFAULT_STYLE )
-		self.LoadingAnimation.LoadFile( u"C:\\Users\\Matthew\\Desktop\\python\\PokerGame\\Blocks-1s-200px.gif" )
+		self.LoadingAnimation.LoadFile( u"./Blocks-1s-200px.gif" )
 
 		self.LoadingAnimation.Play()
 		bSizer17.Add( self.LoadingAnimation, 0, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, 5 )
@@ -309,8 +309,18 @@ class InGameFrame ( wx.Frame ):
 
 		bSizer24.Add( self.RaiseButton, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
 
-		self.RaiseSlider = wx.Slider( self, wx.ID_ANY, 50, 1, 100, wx.DefaultPosition, wx.DefaultSize, wx.SL_BOTH|wx.SL_HORIZONTAL|wx.SL_LABELS )
-		bSizer24.Add( self.RaiseSlider, 1, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
+		bSizer19 = wx.BoxSizer( wx.VERTICAL )
+
+		self.RaiseSlider = wx.Slider( self, wx.ID_ANY, 2, 1, 100, wx.DefaultPosition, wx.Size( 250,-1 ), wx.SL_BOTH|wx.SL_HORIZONTAL )
+		bSizer19.Add( self.RaiseSlider, 1, wx.ALL|wx.ALIGN_CENTER_VERTICAL|wx.EXPAND, 5 )
+
+		self.SliderValueLabel = wx.StaticText( self, wx.ID_ANY, u"2", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.SliderValueLabel.Wrap( -1 )
+
+		bSizer19.Add( self.SliderValueLabel, 0, wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, 5 )
+
+
+		bSizer24.Add( bSizer19, 1, wx.EXPAND, 5 )
 
 		self.AllInButton = wx.Button( self, wx.ID_ANY, u"All in", wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT )
 		bSizer24.Add( self.AllInButton, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )

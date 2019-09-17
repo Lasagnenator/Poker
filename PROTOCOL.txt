@@ -52,3 +52,14 @@ FIRST3\n | FOURTH\n | FIFTH\n
 <card1>\n
 <card2>\n      -- only for FIRST3
 <card3>        -- only for FIRST3
+
+--REVEAL PROTOCOL  -- sent to every player
+REVEAL\n
+<card1>\x00<card2>\n -- This is player 0
+...
+
+--WINNER PROTOCOL  -- sent to every player
+WINNER\n
+<player number>\x00<player number>...\n --Only has multiple in the case of tie
+<win type>
+<amount per winner>
