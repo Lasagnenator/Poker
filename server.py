@@ -105,6 +105,10 @@ def handle_recv(c_s):
             username = data[0]
             password = data[1]
             value = money.retrieve(username, password)
+            if value<=0: #no money
+                print("Player",number,"had no money. Kicking them.")
+                connected.remove(c_s)
+                return
             info.append([username, str(value), ""])
             user_pass.append([username, password])
             #print(info)
